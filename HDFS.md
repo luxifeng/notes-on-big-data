@@ -2,7 +2,7 @@
 
 **Hadoop分布式文件系统（HDFS）是**运行在低成本商用硬件上的分布式文件系统，具有高度容错性，适用于批处理、大数据集（GB-TB）、write-once-read-many的场景。
 
-# 1 概念
+## 1 概念
 
 **机架（Rack）**：大型的HDFS实例通常分布在多个机架的多台服务器上，同个机架通常共享电源、网线和交换机，不同机架上的两台服务器之间通过交换机进行通讯，同一机架中的服务器间的网络带宽大于不同机架中的服务器之间的带宽，具体部署如图所示：
 
@@ -28,9 +28,9 @@
 
 **HDFS联邦机制（HDFS Federation）**：允许集群横向扩展NameNode避免内存不足。Namespace被拆分成了多个独立的部分，分别由不同的NameNode独立管理。DataNode作为共享存储，存储所有的数据块。
 
-# 2 架构设计
+## 2 架构设计
 
-## 2.1 主从架构
+### 2.1 主从架构
 
 HDFS采用主从设计。一个HDFS集群由一个NameNode和多个DataNode组成，NameNode为master节点，DataNode为worker节点。
 
@@ -40,7 +40,7 @@ HDFS作为一个文件系统提供给用户存放数据。文件只允许write-o
 
 ![Untitled](image/HDFS/2.png)
 
-## 2.2 文件系统Namespace
+### 2.2 文件系统Namespace
 
 HDFS支持传统的层次型文件组织，
 
@@ -51,7 +51,7 @@ HDFS支持传统的层次型文件组织，
 - 存在保留路径或名称
 - NameNode负责维护文件系统名称空间，记录对名称空间或其属性的任何更改
 
-## 2.3 数据复制
+### 2.3 数据复制
 
 HDFS实现容错的方式之一是复制数据块，复制因子可以按文件粒度进行配置，默认情况下，复制因子是3。
 
@@ -67,7 +67,7 @@ HDFS采用机架感知副本放置策略，对于常见情况，当复制因子�
 
 另外，集群启动时NameNode先进入安全模式。该模式下数据块不复制，NameNode接受DataNode的心跳和Blockreport，形成blockMap，并校验数据块是否达到了指定的副本数。校验之后，NameNode推出安全模式。如果发现数据块少于指定的副本数，NameNode复制它们到其他DataNode。
 
-## 2.3 元数据持久化
+### 2.3 元数据持久化
 
 NameNode使用事务日志EditLog记录增删改操作日志，如创建文件、修改副本数。EditLog存储在NameNode所在的OS文件系统。
 
@@ -77,7 +77,7 @@ NameNode使用内存保留文件系统的映像和blockMap。
 
 DataNode在本地文件系统存储HDFS数据，对HDFS文件无感知，只存储数据块到单独的文件里。
 
-### 2.3.1 Checkpoint
+#### 2.3.1 Checkpoint
 
 HDFS 的每个事务操作都会写入EditLog 中，随着时间的积累 EditLog 会变的很大，极端情况下会占满整个磁盘。另外，由于 NameNode 在启动的时候，需要将 EditLog 中的操作重新执行一遍，过大的 EditLog 会延长 NameNode 的启动时间。同时，实时更新FsImage效率比较低。所以，通过 Checkpoint 定期对元数据进行合并。
 
@@ -87,15 +87,15 @@ Checkpoint 会把 FSImage 和 EditLog 的内容进行合并生成一个新的 FS
 
 这样在 NameNode 启动的时候就不用将巨大的 EditLog 中的事务再执行一遍，而是直接加载合并之后的新 FSImage ，然后重新执行未被合并的 EditLog 文件就可以了。
 
-### 2.3.2 SNN辅助管理
+#### 2.3.2 SNN辅助管理
 
 ![Untitled](image/HDFS/6.png)
 
-## 2.4 通信协议
+### 2.4 通信协议
 
 ![Untitled](image/HDFS/7.png)
 
-## 2.5 **架构的稳定性**
+### 2.5 **架构的稳定性**
 
 **1. 心跳机制和重新复制**
 
@@ -113,7 +113,7 @@ FsImage 和 EditLog 是 HDFS 的核心数据，这些数据的意外丢失可能
 
 快照支持在特定时刻存储数据副本，在数据意外损坏时，可以通过回滚操作恢复到健康的数据状态。
 
-# 3 **图解HDFS存储原理**
+## 3 **图解HDFS存储原理**
 
 ![Untitled](image/HDFS/8.png)
 
@@ -133,7 +133,7 @@ FsImage 和 EditLog 是 HDFS 的核心数据，这些数据的意外丢失可能
 
 ![Untitled](image/HDFS/16.png)
 
-# 4 HDFS高可用
+## 4 HDFS高可用
 
 典型的HA集群中，2个或更多的独立机器配置为NameNode，但在任意一个时间点，只有一个NameNode处于Active状态，其他处于Standby状态。Active NameNode负责所有客户端操作，Standby NameNode只负责数据的同步，在必要时提供快速故障转移。
 
@@ -149,7 +149,7 @@ FsImage 和 EditLog 是 HDFS 的核心数据，这些数据的意外丢失可能
 
 ![Untitled](image/HDFS/18.png)
 
-# 参考资料
+## 参考资料
 
 HDFS Architecture Guide. https://hadoop.apache.org/docs/r1.2.1/hdfs_design.html, 2022-07-31
 
